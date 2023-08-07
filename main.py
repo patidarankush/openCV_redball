@@ -36,30 +36,28 @@ while True:
     # Find contours
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    # for contour in contours:
-    #     # Get the center of the contour
-    #     M = cv2.moments(contour)
-    #     cX = int(M["m10"] / M["m00"])
-    #     cY = int(M["m01"] / M["m00"])
-
-    #     # Send the position data to Firebase
-    #     ref = db.reference('ball_position')
-    #     ref.set({
-    #         'x': cX,
-    #         'y': cY
-    #     })
-
     for contour in contours:
+        # Get the center of the contour
         M = cv2.moments(contour)
-    if M["m00"] != 0:  # Add this check
-        cX = int(M["m10"] / M["m00"])
-        cY = int(M["m01"] / M["m00"])
+        if M["m00"] != 0:  # Add this check
+            cX = int(M["m10"] / M["m00"])
+            cY = int(M["m01"] / M["m00"])
 
-        # Send the position data to Firebase
-        ref = db.reference("ball_position")
-        ref.set({"x": cX, "y": cY})
+            # Send the position data to Firebase
+            ref = db.reference("ball_position")
+            ref.set({"x": cX, "y": cY})
 
+            # Draw a circle at the center of the ball
+            cv2.circle(frame, (cX, cY), 10, (0, 255, 0), -1)
 
-# When everything done, release the capture
+    # Display the resulting frame and mask
+    cv2.imshow("Frame", frame)
+    cv2.imshow("Mask", mask)
+
+    # Break the loop on 'q' key press
+    if cv2.waitKey(1) & 0xFF == ord("q"):
+        break
+
+# When everything done, release the capture and destroy the windows
 cap.release()
 cv2.destroyAllWindows()
